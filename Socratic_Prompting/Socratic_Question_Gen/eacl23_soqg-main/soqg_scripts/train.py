@@ -20,28 +20,41 @@ def train(epoch, tokenizer, model, device, loader, optimizer, training_logger):
     
     for _, data in enumerate(loader, 0):
         y = data["target_ids"].to(device, dtype=torch.long)
+        
+        # Removes the last token from y to create the decoder input
         y_ids = y[:, :-1].contiguous()
+        
+        # This is the target sequence shifted by one token to the right.
         lm_labels = y[:, 1:].clone().detach()
+        
+        # ensures that the padding tokens are ignored during loss computation by setting their label to -100
         lm_labels[y[:, 1:] == tokenizer.pad_token_id] = -100
+        
         ids = data["source_ids"].to(device, dtype=torch.long)
         mask = data["source_mask"].to(device, dtype=torch.long)
 
+        # Model Forward Pass
         outputs = model(
             input_ids=ids,
             attention_mask=mask,
             decoder_input_ids=y_ids,
             labels=lm_labels,
         )
+
+        # Compute Loss and Update Total Loss
         loss = outputs[0]
         total_loss += loss.item()
 
+        # Log the Loss for Every 1000 Batches
         if _ % 1000 == 0:
             training_logger.append([str(epoch), str(_), str(loss)])
             logging.info(tabulate(training_logger))
 
+        # Backpropagation
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
     logging.info(f"Epoch Total Train Loss: {total_loss}")
     return total_loss
 
