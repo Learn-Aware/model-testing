@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import Questionnaire from "./Questionnaire";
 import ChatAgent from "./ChatAgent";
+import Settings from "./Settings";
 
 const { TabPane } = Tabs;
 
@@ -47,7 +48,7 @@ const MainContent = () => {
         }
         key="2"
       >
-        <p>General settings content goes here.</p>
+        <Settings />
       </TabPane>
 
       {/* Advanced Settings Tab */}
